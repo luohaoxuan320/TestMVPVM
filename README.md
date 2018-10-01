@@ -27,3 +27,6 @@ singleTask+FLAG_ACTIVITY_CLEAR_TASK
 
 ---------------------
 
+## FLAG_ACTIVITY_CLEAR_TASK黑屏问题
+
+[如何避免使用Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK之后的黑屏问题](https://blog.csdn.net/y505772146/article/details/46800825)
