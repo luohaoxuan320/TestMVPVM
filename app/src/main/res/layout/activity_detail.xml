@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DetailActivity"
+    tools:context=".detail.DetailActivity"
     >
 
   <TextView
@@ -23,10 +23,31 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="228dp"
+      android:onClick="btnRelogin"
       android:text="重新登录"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      android:onClick="btnRelogin"
+      />
+  <Button
+      android:id="@+id/btn_add"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="55dp"
+      android:text="Add"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      android:onClick="clickAdd"
+      />
+  <TextView
+      android:id="@+id/tv_info"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="27dp"
+      android:layout_marginStart="15dp"
+      android:text="TextView"
+      app:layout_constraintBottom_toTopOf="@+id/btn_add"
+      app:layout_constraintStart_toStartOf="@+id/btn_add"
       />
 </android.support.constraint.ConstraintLayout>

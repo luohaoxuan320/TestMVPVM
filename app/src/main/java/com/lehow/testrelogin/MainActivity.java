@@ -4,12 +4,16 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import com.lehow.testrelogin.detail.DetailActivity;
+import com.lehow.testrelogin.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
+
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
   }
 
   public void btnClick(View view) {
@@ -18,9 +22,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void btnRelogin(View view) {
-    Intent intent = new Intent(this, LoginActivity.class);
+    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    startActivity(intent);
+    getApplicationContext().startActivity(intent);
   }
 }
