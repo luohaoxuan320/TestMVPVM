@@ -1,4 +1,7 @@
-# TestRelogin
+# TestMVPVM
+
+
+## Token失效，重新登录
 
 当Token失效时，需要重新登录，很多方案是在BaseActivity中记录打开的Activity列表，或者发广播的方式通知关闭，感觉很low。
 
