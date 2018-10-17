@@ -1,5 +1,7 @@
 # TestMVPVM
 
+这是一个Rxjava2+Retrofit+Dagger2+ViewModel实现的一个MVPVM测试框架
+
 
 ## Token失效，重新登录
 
