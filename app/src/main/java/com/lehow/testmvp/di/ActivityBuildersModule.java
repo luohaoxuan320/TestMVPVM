@@ -2,6 +2,7 @@ package com.lehow.testmvp.di;
 
 import com.lehow.testmvp.detail.DetailActivity;
 import com.lehow.testmvp.login.LoginActivity;
+import com.lehow.testmvp.testfrg.FrgActivity;
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 
@@ -17,4 +18,6 @@ public abstract class ActivityBuildersModule {
   abstract LoginActivity bindLoginActivity();
 
   @ContributesAndroidInjector() abstract DetailActivity bindDetailActivity();
+
+  @ContributesAndroidInjector() abstract FrgActivity bindFrgActivity();
 }

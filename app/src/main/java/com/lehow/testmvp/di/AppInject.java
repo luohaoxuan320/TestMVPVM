@@ -1,6 +1,7 @@
 package com.lehow.testmvp.di;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

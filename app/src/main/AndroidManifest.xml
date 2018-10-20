@@ -3,6 +3,7 @@
     package="com.lehow.testmvp">
 
   <uses-permission android:name="android.permission.INTERNET"/>
+
   <application
       android:name=".MyApplication"
       android:allowBackup="true"
@@ -11,7 +12,9 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:supportsRtl="true"
       android:theme="@style/AppTheme">
-    <activity android:name=".MainActivity" android:label="首页">
+    <activity
+        android:name=".MainActivity"
+        android:label="首页">
     </activity>
     <activity
         android:name=".FlashActivity"
@@ -24,13 +27,14 @@
     </activity>
     <activity
         android:name=".login.LoginActivity"
-        android:launchMode="singleTask"
-        android:label="登录">
-
+        android:label="登录"
+        android:launchMode="singleTask">
     </activity>
     <activity
         android:name=".detail.DetailActivity"
         android:label="详情页">
+    </activity>
+    <activity android:name=".testfrg.FrgActivity">
     </activity>
   </application>
 
