@@ -37,13 +37,13 @@ singleTask+FLAG_ACTIVITY_CLEAR_TASK
 [如何避免使用Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK之后的黑屏问题](https://blog.csdn.net/y505772146/article/details/46800825)
 
 
-#弹框提示用户需重新登录
+# 弹框提示用户需重新登录
 
 有时候在单点登录，或者token失效的时候，需要弹框显式的提示客户需要重新登录，那么这个弹框怎么处理。
 
 之前封装的NetApi是放在BaseActivity中，所以遇到token失效弹框提示的时候，可以直接用当前的context来创建弹框。但是如果是被踢下线，要怎么弹框提示？？有点尴尬，弹框不能用Application的Context，怎么弄，有一种方案是，使用一个透明的Activity来承载这个弹框。但是这样会带来一个问题，如果app在后台，这样会被直接唤醒打断到了用户，我只想在用户返回的时候才显示，要怎么做？？
 
-后面引入ViewModel后，NetApi的初始化放在了Application中，然后在Application中使用动态代理统一处理token失效的情况，此时又遇到了弹框的问题，application中怎么弹出来？？
+后面引入ViewModel后，NetApi的初始化放在了Application中，然后在Application中使用动态代理统一处理token失效的情况，此时又遇到了弹框的问题，application中怎么弹出来？？怎么获取当前栈中栈顶的Activity实例？？
 
 经过搜索有一个类映入了我的眼帘 [ActivityLifecycleCallbacks](https://blog.csdn.net/u010072711/article/details/77090313)
 
