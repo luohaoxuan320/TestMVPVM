@@ -11,6 +11,7 @@ import com.lehow.net.RxTransformer;
 import com.lehow.testmvp.MainActivity;
 import com.lehow.testmvp.R;
 import com.lehow.testmvp.base.BaseActivity;
+import com.lehow.testmvp.testpaging.TestPaginActivity;
 import com.uber.autodispose.AutoDispose;
 import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider;
 import javax.inject.Inject;
@@ -44,5 +45,9 @@ public class LoginActivity extends BaseActivity {
         });
     startActivity(new Intent(this, MainActivity.class));
     finish();
+  }
+
+  public void btnTestPaging(View view) {
+    startActivity(new Intent(this, TestPaginActivity.class));
   }
 }

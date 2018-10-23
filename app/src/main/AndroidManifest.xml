@@ -36,6 +36,8 @@
     </activity>
     <activity android:name=".testfrg.FrgActivity">
     </activity>
+    <activity android:name=".testpaging.TestPaginActivity">
+    </activity>
   </application>
 
 </manifest>

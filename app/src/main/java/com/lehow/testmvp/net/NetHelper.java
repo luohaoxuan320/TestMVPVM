@@ -1,5 +1,9 @@
 package com.lehow.testmvp.net;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.lehow.net.PagerJsonSerializer;
+import com.lehow.net.PagerReqMix;
 import com.lehow.net.converter.GsonConverterFactory;
 import com.lehow.testmvp.BuildConfig;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +26,7 @@ public class NetHelper {
     loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
     retrofit = new Retrofit.Builder().baseUrl(BuildConfig.HOST)
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(getGson()))
         .client(new OkHttpClient.Builder().addInterceptor(loggingInterceptor)
             .addInterceptor(new BaseUrlInterceptor())
             .addInterceptor(new HeaderInterceptor())
@@ -35,5 +39,11 @@ public class NetHelper {
 
   public <T> T create(final Class<T> service) {
     return retrofit.create(service);
+  }
+
+  public Gson getGson() {
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(PagerReqMix.class, PagerJsonSerializer.class);
+    return gsonBuilder.create();
   }
 }

@@ -1,7 +1,11 @@
 package com.lehow.testmvp.di;
 
 import android.util.Log;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.lehow.net.ApiStateException;
+import com.lehow.net.PagerJsonSerializer;
+import com.lehow.net.PagerReqMix;
 import com.lehow.net.RxTransformer;
 import com.lehow.net.converter.GsonConverterFactory;
 import com.lehow.testmvp.BuildConfig;
@@ -56,7 +60,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
   @Provides Retrofit provideRetrofit(OkHttpClient okHttpClient) {
     //Log.i("TAG", "provideRetrofit: "+okHttpClient);
     return new Retrofit.Builder().baseUrl(BuildConfig.HOST)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(getGson()))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .client(okHttpClient)
         .build();
@@ -68,6 +72,11 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
     return loggingInterceptor;
   }
 
+  private Gson getGson() {
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(PagerReqMix.class, new PagerJsonSerializer());
+    return gsonBuilder.create();
+  }
   private <T> MaybeTransformer filterRelogin() {
     return new MaybeTransformer<T, T>() {
       @Override public MaybeSource<T> apply(Maybe<T> upstream) {

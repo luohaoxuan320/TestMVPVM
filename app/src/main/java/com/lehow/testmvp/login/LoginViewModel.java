@@ -1,5 +1,6 @@
 package com.lehow.testmvp.login;
 
+import com.lehow.net.PagerReqMix;
 import com.lehow.testmvp.net.NetApi;
 import com.lehow.testmvp.net.NetViewModel;
 import io.reactivex.Maybe;
@@ -20,6 +21,6 @@ public class LoginViewModel extends NetViewModel {
     HashMap<String, String> hashMap = new HashMap<>();
     hashMap.put("loginPhone", phone);
     hashMap.put("pwd", passWord);
-    return netApi.managerLogin(hashMap);
+    return netApi.managerLogin(PagerReqMix.create(0, hashMap));
   }
 }
