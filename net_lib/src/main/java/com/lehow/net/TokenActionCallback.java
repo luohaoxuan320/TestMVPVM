@@ -12,4 +12,6 @@ public interface TokenActionCallback<R> {
   Maybe<R> getUpdateTokenMaybe();
 
   void onUpdateTokenSuccess(R tokenResult);
+
+  void onReLogin();
 }

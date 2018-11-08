@@ -72,6 +72,7 @@ public class RxTransformer {
     return new WaitingTransformer(iLoadingView);
   }
 
+
   public static <T> MaybeTransformer<T, T> retryToken(final Maybe tokenObservable) {
     return new MaybeTransformer<T, T>() {
       @Override public MaybeSource<T> apply(Maybe<T> upstream) {
@@ -140,6 +141,14 @@ public class RxTransformer {
                 return Maybe.error(throwable).toFlowable();//直接返回错误
               }
             });
+          }
+        }).onErrorResumeNext(new Function<Throwable, MaybeSource<? extends T>>() {
+          @Override public MaybeSource<? extends T> apply(Throwable throwable) throws Exception {
+            if (throwable instanceof ReLoginException) {
+              //返回登录
+              tokenActionCallback.onReLogin();
+            }
+            return Maybe.error(throwable);
           }
         });
       }
