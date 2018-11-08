@@ -2,8 +2,8 @@ package com.lehow.net;
 
 public class ApiStateException extends RuntimeException {
   public static final int STATE_OK = 0;
-  public static int ERR_ACCESS_TOKEN = 401;
-  public static final int ERR_REFRESH_TOKEN = 20015;
+  public static int ERR_ACCESS_TOKEN = -7;
+  //public static final int ERR_REFRESH_TOKEN = 20015;
   private int code;
   private String msg;
   private String dateTime;
@@ -26,6 +26,10 @@ public class ApiStateException extends RuntimeException {
 
   public String getMsg() {
     return msg;
+  }
+
+  public void setMsg(String msg) {
+    this.msg = msg;
   }
 
   public String getDateTime() {

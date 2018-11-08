@@ -16,6 +16,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -25,24 +26,60 @@ import org.reactivestreams.Publisher;
 
 public class RxTransformer {
 
-  private static final String TAG = "TAG";
+  private static final String TAG = "RxTransformer";
 
-  public static <T> IoMainTransformer<T> io_main() {
-    return new IoMainTransformer();
+  private static class TransfIoMain {
+    private static final MaybeTransformer TRANSFORMER = new MaybeTransformer() {
+      @Override public MaybeSource apply(Maybe upstream) {
+        return upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+      }
+    };
   }
 
-  public static <T> WaitingTransformer<T> waitLoading(final ILoadingView iLoadingView) {
+  public static <T> MaybeTransformer<T, T> io_main() {
+    return TransfIoMain.TRANSFORMER;
+  }
+
+  public static <T> MaybeTransformer<T, T> waitLoading2(final ILoadingView iLoadingView) {
+
+    return new MaybeTransformer<T, T>() {
+
+      @Override public MaybeSource<T> apply(final Maybe<T> upstream) {
+        return Maybe.using(new Callable<ILoadingView>() {
+          @Override public ILoadingView call() throws Exception {
+            Log.i(TAG, "show: " + Thread.currentThread());
+            iLoadingView.show();
+            return iLoadingView;
+          }
+        }, new io.reactivex.functions.Function<ILoadingView, MaybeSource<? extends T>>() {
+          @Override public MaybeSource<? extends T> apply(ILoadingView iLoadingView)
+              throws Exception {
+            Log.i(TAG, "dowork: " + Thread.currentThread());
+            return upstream;
+          }
+        }, new Consumer<ILoadingView>() {
+          @Override public void accept(ILoadingView iLoadingView) throws Exception {
+            Log.i(TAG, "dismiss: " + Thread.currentThread());
+            iLoadingView.dismiss();
+          }
+        });
+      }
+    };
+  }
+
+  public static WaitingTransformer waitLoading(final ILoadingView iLoadingView) {
 
     return new WaitingTransformer(iLoadingView);
   }
 
-  public static <T> MaybeTransformer retryToken(final Maybe tokenObservable) {
+  public static <T> MaybeTransformer<T, T> retryToken(final Maybe tokenObservable) {
     return new MaybeTransformer<T, T>() {
       @Override public MaybeSource<T> apply(Maybe<T> upstream) {
 
         return upstream.retryWhen(new Function<Flowable<Throwable>, Publisher<?>>() {
           @Override public Publisher<?> apply(Flowable<Throwable> throwableFlowable)
               throws Exception {
+
             return throwableFlowable.flatMap(new Function<Throwable, Publisher<?>>() {
               @Override public Publisher<?> apply(Throwable throwable) throws Exception {
                 if (throwable instanceof ApiStateException) {
@@ -52,9 +89,9 @@ public class RxTransformer {
                     return TokenRefresh.getInstance()
                         .refresh(tokenObservable.toObservable())
                         .toFlowable(BackpressureStrategy.DROP);//等待刷新token
-                  } else if (errCode == ApiStateException.ERR_REFRESH_TOKEN) {
+                  } /*else if (errCode == ApiStateException.ERR_REFRESH_TOKEN) {
                     //退回登录
-                  }
+                  }*/
                 }
                 return Maybe.error(throwable).toFlowable();//直接返回错误
               }
@@ -65,7 +102,51 @@ public class RxTransformer {
     };
   }
 
-  public static <T> ObservableTransformer retryToken(final Observable tokenObservable) {
+  public static <T, R> MaybeTransformer<T, T> retryToken(
+      final TokenActionCallback<R> tokenActionCallback) {
+    return new MaybeTransformer<T, T>() {
+      @Override public MaybeSource<T> apply(Maybe<T> upstream) {
+
+        return upstream.retryWhen(new Function<Flowable<Throwable>, Publisher<?>>() {
+          @Override public Publisher<?> apply(Flowable<Throwable> throwableFlowable)
+              throws Exception {
+
+            return throwableFlowable.flatMap(new Function<Throwable, Publisher<?>>() {
+              @Override public Publisher<?> apply(final Throwable throwable) throws Exception {
+                if (throwable instanceof ApiStateException) {
+                  int errCode = ((ApiStateException) throwable).getCode();
+                  if (errCode == ApiStateException.ERR_ACCESS_TOKEN) {
+                    Log.i(TAG, "retryToken 等待Token刷新: " + Thread.currentThread());
+                    return TokenRefresh.getInstance()
+                        .refresh(Maybe.defer(new Callable<MaybeSource<R>>() {
+                          @Override public MaybeSource<R> call() throws Exception {
+                            return tokenActionCallback.getUpdateTokenMaybe();
+                          }
+                        }).doOnSuccess(new Consumer<R>() {
+                          @Override public void accept(R r) throws Exception {
+                            tokenActionCallback.onUpdateTokenSuccess(r);
+                          }
+                        }).doOnComplete(new Action() {
+                          @Override public void run() throws Exception {
+                            //data返回为null
+                            throw new ReLoginException();
+                          }
+                        }).toObservable())
+                        .toFlowable(BackpressureStrategy.DROP);//等待刷新token
+                  } /*else if (errCode == ApiStateException.ERR_REFRESH_TOKEN) {
+                    //退回登录
+                  }*/
+                }
+                return Maybe.error(throwable).toFlowable();//直接返回错误
+              }
+            });
+          }
+        });
+      }
+    };
+  }
+
+  public static <T> ObservableTransformer<T, T> retryToken(final Observable tokenObservable) {
     return new ObservableTransformer<T, T>() {
 
       @Override public ObservableSource<T> apply(Observable<T> upstream) {
@@ -80,11 +161,27 @@ public class RxTransformer {
                   int errCode = ((ApiStateException) throwable).getCode();
                   if (errCode == ApiStateException.ERR_ACCESS_TOKEN) {
                     Log.i(TAG, "retryToken 等待Token刷新: " + Thread.currentThread());
-                    return TokenRefresh.getInstance().refresh(tokenObservable);//等待刷新token
-                  } else if (errCode == ApiStateException.ERR_REFRESH_TOKEN) {
+                    return TokenRefresh.getInstance()
+                        .refresh(tokenObservable)
+                        .doOnNext(new Consumer() {
+                          @Override public void accept(Object o) throws Exception {
+                            Log.i(TAG, "retryToken doOnNext accept: " + o);
+                          }
+                        })
+                        .doOnComplete(new Action() {
+                          @Override public void run() throws Exception {
+                            Log.i(TAG, "retryToken run: doOnComplete 刷新Token结束==");
+                          }
+                        })
+                        .doOnError(new Consumer<Throwable>() {
+                          @Override public void accept(Throwable throwable) throws Exception {
+                            Log.i(TAG, "retryToken run: doOnError 刷新Token结束==");
+                          }
+                        });//等待刷新token
+                  }/* else if (errCode == ApiStateException.ERR_REFRESH_TOKEN) {
                     //退回登录
 
-                  }
+                  }*/
                 }
                 return Observable.error(throwable);//直接返回错误
               }
@@ -95,34 +192,9 @@ public class RxTransformer {
     };
   }
 
-  static class IoMainTransformer<T>
-      implements MaybeTransformer<T, T>, ObservableTransformer<T, T>, CompletableTransformer,
-      FlowableTransformer<T, T> {
-
-    @Override public CompletableSource apply(Completable upstream) {
-      Log.i(TAG, "IoMain:thread=" + Thread.currentThread());
-      return upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-    }
-
-    @Override public Publisher<T> apply(Flowable<T> upstream) {
-      Log.i(TAG, "IoMain:thread=" + Thread.currentThread());
-      return upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-    }
-
-    @Override public MaybeSource<T> apply(Maybe<T> upstream) {
-      Log.i(TAG, "IoMain:thread=" + Thread.currentThread());
-      return upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-    }
-
-    @Override public ObservableSource<T> apply(Observable<T> upstream) {
-      Log.i(TAG, "IoMain:thread=" + Thread.currentThread());
-      return upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-    }
-  }
-
-  static class WaitingTransformer<T>
-      implements MaybeTransformer<T, T>, ObservableTransformer<T, T>, CompletableTransformer,
-      FlowableTransformer<T, T> {
+  static class WaitingTransformer
+      implements MaybeTransformer, ObservableTransformer, CompletableTransformer,
+      FlowableTransformer {
 
     ILoadingView loadingView;
 
@@ -164,17 +236,17 @@ public class RxTransformer {
     }
 
     @Override public void accept(ILoadingView loadingView) throws Exception {
-      Log.i(TAG, "WaitingTransformer dismiss: " + Thread.currentThread());
+      Log.i(TAG, "dismiss: " + Thread.currentThread());
       iLoadingView.dismiss();
     }
 
     @Override public T apply(ILoadingView loadingView) throws Exception {
-      Log.i(TAG, "WaitingTransformer dowork: " + Thread.currentThread());
+      Log.i(TAG, "dowork: " + Thread.currentThread());
       return upstream;
     }
 
     @Override public ILoadingView call() throws Exception {
-      Log.i(TAG, "WaitingTransformer show: " + Thread.currentThread());
+      Log.i(TAG, "show: " + Thread.currentThread());
       iLoadingView.show();
       return iLoadingView;
     }
