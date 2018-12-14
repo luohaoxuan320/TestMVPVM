@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.lehow.net.PagerJsonSerializer;
 import com.lehow.net.PagerReqMix;
 import com.lehow.net.converter.GsonConverterFactory;
+import com.lehow.net.interceptor.NetMockedInterceptor;
 import com.lehow.testmvp.BuildConfig;
 import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
@@ -28,6 +29,8 @@ public class NetHelper {
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create(getGson()))
         .client(new OkHttpClient.Builder().addInterceptor(loggingInterceptor)
+            //.addInterceptor(new NetMockedInterceptor(BuildConfig.HOST,BuildConfig.URL_MOCK))
+            //.addInterceptor(new NetMockedInterceptor(BuildConfig.HOST,BuildConfig.URL_MOCK,new String[]{"你要mock拦截的接口列表"}))
             .addInterceptor(new BaseUrlInterceptor())
             .addInterceptor(new HeaderInterceptor())
             .connectTimeout(30, TimeUnit.SECONDS)

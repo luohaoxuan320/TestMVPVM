@@ -13,21 +13,33 @@
       android:id="@+id/textView2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="39dp"
-      android:layout_marginStart="16dp"
+      android:layout_marginBottom="64dp"
+      android:layout_marginStart="20dp"
       android:text="登录页"
       app:layout_constraintBottom_toTopOf="@+id/button"
       app:layout_constraintStart_toStartOf="@+id/button"
       />
   <Button
       android:id="@+id/button"
-      android:onClick="btnLogin"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:onClick="btnLogin"
       android:text="Button"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.311"
+      />
+  <Button
+      android:id="@+id/button7"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="39dp"
+      android:text="TestPaging"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/button"
+      android:onClick="btnTestPaging"
       />
 </android.support.constraint.ConstraintLayout>

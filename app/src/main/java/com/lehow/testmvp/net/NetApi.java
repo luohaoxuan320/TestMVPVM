@@ -1,6 +1,7 @@
 package com.lehow.testmvp.net;
 
 import com.lehow.net.PagerReqMix;
+import com.lehow.net.annotation.MockNet;
 import com.lehow.testmvp.login.LoginResult;
 import io.reactivex.Maybe;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import retrofit2.http.POST;
  */
 public interface NetApi {
 
-  @POST("managerApi/managerLogin") Maybe<LoginResult.SaleInfo> managerLogin(
+  @MockNet @POST("managerApi/managerLogin") Maybe<LoginResult.SaleInfo> managerLogin(
       @Body PagerReqMix<HashMap<String, String>> loginInfo);
 }
 

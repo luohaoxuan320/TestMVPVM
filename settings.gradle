@@ -1,1 +1,1 @@
-include ':app',':net_lib'
+include ':app',':net_lib', ':mock_net_processor'

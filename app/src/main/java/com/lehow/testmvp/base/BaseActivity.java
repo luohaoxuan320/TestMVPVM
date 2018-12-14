@@ -3,6 +3,8 @@ package com.lehow.testmvp.base;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewGroup;
 import butterknife.ButterKnife;
 import dagger.android.AndroidInjection;
 
@@ -14,7 +16,11 @@ import dagger.android.AndroidInjection;
 public class BaseActivity extends AppCompatActivity {
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     AndroidInjection.inject(this);
-    ButterKnife.bind(this);
     super.onCreate(savedInstanceState);
+  }
+
+  @Override public void setContentView(int layoutResID) {
+    super.setContentView(layoutResID);
+    ButterKnife.bind(this);
   }
 }

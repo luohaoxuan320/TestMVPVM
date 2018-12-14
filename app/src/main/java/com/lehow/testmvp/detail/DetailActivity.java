@@ -47,14 +47,14 @@ public class DetailActivity extends BaseActivity implements ILoadingView {
     btnAdd = findViewById(R.id.btn_add);
     detailViewModel = ViewModelProviders.of(this).get(DetailViewModel.class);
 
-    detailViewModel.getValueInfo().compose(RxTransformer.<Long>waitLoading(this))
-        .as(AutoDispose.<Long>autoDisposable(AndroidLifecycleScopeProvider.from(getLifecycle())))
+    /*detailViewModel.getValueInfo().compose(RxTransformer.waitLoading(this))
+        .as(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(getLifecycle())))
         .subscribe(new Consumer<Long>() {
           @Override public void accept(Long aLong) throws Exception {
             Log.i("TAG", "accept: aLong=" + aLong);
             tvInfo.setText(aLong + "");
           }
-        });
+        });*/
   }
 
 
