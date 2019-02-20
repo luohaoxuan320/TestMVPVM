@@ -7,6 +7,7 @@ import android.view.View;
 import com.lehow.testmvp.detail.DetailActivity;
 import com.lehow.testmvp.login.LoginActivity;
 import com.lehow.testmvp.testfrg.FrgActivity;
+import com.lehow.testmvp.testpaging.TestPaginActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void btnFragment(View view) {
-    Intent intent = new Intent(this, FrgActivity.class);
+    Intent intent = new Intent(this, TestPaginActivity.class);
     startActivity(intent);
   }
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import butterknife.BindView;
 import com.lehow.testmvp.R;
 import com.lehow.testmvp.base.BaseActivity;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 
 public class TestPaginActivity extends BaseActivity {
@@ -26,19 +27,7 @@ public class TestPaginActivity extends BaseActivity {
 
     final MyPagingAdapter myPagingAdapter = new MyPagingAdapter(new MyDifferUtil());
     recyclerView.setAdapter(myPagingAdapter);
-    pagingViewModel.pagedListObservable.subscribe(new Consumer<PagedList<PageEntity>>() {
-      @Override public void accept(PagedList<PageEntity> pageEntities) throws Exception {
-        for (int i = 0; i < pageEntities.size(); i++) {
-          Log.i("TAG",
-              "accept: entity id=" + pageEntities.get(i).getId() + " name=" + pageEntities.get(i)
-                  .getName());
-        }
-        myPagingAdapter.submitList(pageEntities);
-      }
-    }, new Consumer<Throwable>() {
-      @Override public void accept(Throwable throwable) throws Exception {
-        Log.i("TAG", "accept: " + throwable);
-      }
-    });
+    myPagingAdapter.bindViewModel(pagingViewModel);
+
   }
 }

@@ -9,6 +9,10 @@ import android.arch.paging.RxPagedListBuilder;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 import java.util.ArrayList;
 
 /**
@@ -21,6 +25,14 @@ public class PagingViewModel extends ViewModel {
   DataSource.Factory<Integer, PageEntity> pagerListFactory;
   Observable<PagedList<PageEntity>> pagedListObservable;
 
+  public static final int state_loading = 1;
+  public static final int state_retry = 2;
+  public static final int state_finish = 3;
+
+  private int retryCount = 0;
+  PublishSubject<Integer> loadMoreState = PublishSubject.create();
+
+  Observable retrySubject = null;
   public PagingViewModel() {
     this.pagerListFactory = new DataSource.Factory<Integer, PageEntity>() {
       @Override public DataSource<Integer, PageEntity> create() {
@@ -28,7 +40,7 @@ public class PagingViewModel extends ViewModel {
       }
     };
 
-    pagedListObservable = new RxPagedListBuilder(pagerListFactory, 10).buildObservable();
+    pagedListObservable = new RxPagedListBuilder(pagerListFactory, 20).buildObservable();
   }
 
   class ItemDataSource extends ItemKeyedDataSource<Integer, PageEntity> {
@@ -87,7 +99,7 @@ public class PagingViewModel extends ViewModel {
           + " "
           + params.placeholdersEnabled);
       ArrayList<PageEntity> pageEntities = new ArrayList<>();
-      for (Integer i = 0; i < params.requestedLoadSize; i++) {
+      for (Integer i = 0; i < 20; i++) {
         pageEntities.add(new PageEntity(i, "T_" + (i)));
       }
       callback.onResult(pageEntities, null, 1);
@@ -99,22 +111,44 @@ public class PagingViewModel extends ViewModel {
           "loadBefore: key=" + params.key + " requestedLoadSize=" + params.requestedLoadSize);
     }
 
-    @Override public void loadAfter(@NonNull LoadParams<Integer> params,
-        @NonNull LoadCallback<Integer, PageEntity> callback) {
-      int start = params.key * params.requestedLoadSize;
-      start = 0;
+    @Override public void loadAfter(@NonNull final LoadParams<Integer> params,
+        @NonNull final LoadCallback<Integer, PageEntity> callback) {
+
+      loadMoreState.onNext(state_loading);
+      retrySubject = null;
+      int start = 0;
+
       Log.i("TAG", "loadAfter: key="
           + params.key
           + " requestedLoadSize="
           + params.requestedLoadSize
-          + "  start="
-          + start);
+          + "  start=" + start + "  Thread=" + Thread.currentThread());
 
+      int offset = params.key * params.requestedLoadSize;
+
+      try {
+        Thread.sleep(3 * 1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      if (retryCount < 3 && params.key == 2) {
+        loadMoreState.onNext(state_retry);
+        retrySubject = Observable.create(new ObservableOnSubscribe() {
+          @Override public void subscribe(ObservableEmitter emitter) throws Exception {
+            Log.i("TAG", "subscribe: 重新获取请求");
+            retryCount++;
+            loadAfter(params, callback);
+          }
+        }).subscribeOn(Schedulers.io());//不然loadAfter里的sleep会阻塞主线程
+        return;
+      }
       ArrayList<PageEntity> pageEntities = new ArrayList<>();
       for (Integer i = start; i < params.requestedLoadSize; i++) {
-        pageEntities.add(new PageEntity(start, "T_" + (start)));
+        pageEntities.add(new PageEntity(start, "T_" + (offset + i)));
       }
       callback.onResult(pageEntities, params.key + 1);
+      loadMoreState.onNext(state_finish);
     }
   }
 }
